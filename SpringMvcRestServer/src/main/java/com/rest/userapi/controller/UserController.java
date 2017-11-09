@@ -1,7 +1,10 @@
 package com.rest.userapi.controller;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.BindingResultUtils;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -95,8 +100,25 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/users", method = RequestMethod.POST)
-	public ResponseEntity<ResponseBean<Object>> createUser(@RequestBody User user,
+	public ResponseEntity<ResponseBean<Object>> createUser(@RequestBody @Valid User user,BindingResult result,
 			@RequestHeader HttpHeaders headers) {
+		
+		
+		if(result.hasErrors()){
+			List<String> message = new ArrayList<>();
+			List<FieldError> fieldErrors = result.getFieldErrors();
+			for(FieldError e:fieldErrors){
+				message.add("@" + e.getField().toUpperCase() + ":" + e.getDefaultMessage());
+			}
+			
+			ResponseBean<Object> rb = new ResponseBean<>();
+			rb.setDescription("check the request");
+			rb.setErrorCode(400);
+			rb.setT(message.toString());
+			
+			return ResponseEntity.badRequest().body(rb);
+		}
+		
 		String url = props.getEndPointUrl();
 
 		User us = service.saveUser(user);

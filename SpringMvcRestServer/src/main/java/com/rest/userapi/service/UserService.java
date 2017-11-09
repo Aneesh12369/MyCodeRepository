@@ -80,7 +80,7 @@ public class UserService {
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		HttpEntity<User> entity = new HttpEntity<User>(user, headers);
 	    ResponseEntity<User> exchange = template.exchange(url, HttpMethod.POST, entity,User.class);
-	    
+	   System.out.println(exchange);
 	   return exchange.getBody();
 		
 	}
